@@ -27,10 +27,29 @@ yarn add rn-awesome-date-picker
 Then install the required peer dependencies:
 
 ```bash
-npm install react-native-reanimated react-native-svg moment @gorhom/bottom-sheet
+npm install react-native-reanimated react-native-gesture-handler react-native-linear-gradient react-native-svg @gorhom/bottom-sheet
 ```
 
 ## 🚀 Usage
+
+### Setup Requirements
+
+Before using the DatePicker, make sure your app is properly configured with the required wrappers:
+
+```tsx
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+
+export default function App() {
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <BottomSheetModalProvider>
+        {/* Date Picker Usage */}
+      </BottomSheetModalProvider>
+    </GestureHandlerRootView>
+  );
+}
+```
 
 ### Single Date Selection
 
