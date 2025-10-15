@@ -42,6 +42,10 @@ export interface DatePickerBaseProps {
     customHeader?: React.ReactNode;
     customFooter?: React.ReactNode;
     dateCellStyle?: StyleProp<ViewStyle>;
+    currentSlideFormatter?: (date: Date) => string;
+    customWeekDays?: string[];
+    yearCellStyle?: StyleProp<Omit<ViewStyle, "backgroundColor" | "color">>;
+    monthCellStyle?: StyleProp<Omit<ViewStyle, "backgroundColor" | "color">>;
     minDate?: Date;
     maxDate?: Date;
 }

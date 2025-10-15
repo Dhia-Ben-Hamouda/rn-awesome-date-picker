@@ -27,7 +27,7 @@ yarn add rn-awesome-date-picker
 Then install the required peer dependencies:
 
 ```bash
-npm install react-native-reanimated react-native-gesture-handler react-native-linear-gradient react-native-svg @gorhom/bottom-sheet
+npm install react-native-reanimated react-native-worklets react-native-gesture-handler react-native-linear-gradient react-native-svg @gorhom/bottom-sheet
 ```
 
 ## 🚀 Usage
@@ -37,8 +37,8 @@ npm install react-native-reanimated react-native-gesture-handler react-native-li
 Before using the DatePicker, make sure your app is properly configured with the required wrappers:
 
 ```tsx
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 
 export default function App() {
   return (
@@ -121,89 +121,89 @@ function App() {
 
 ### Base Props (Common to both modes)
 
-| Prop                          | Type                       | Default         | Description                                      |
-| ----------------------------- | -------------------------- | --------------- | ------------------------------------------------ |
-| `mode`                        | `"single" \| "range"`      | `"single"`      | Selection mode                                   |
-| `value`                       | `Date \| DateRangeValue`   | **required**    | Current selected date(s)                         |
-| `onChange`                    | `function`                 | `undefined`     | Callback when date changes                       |
-| `label`                       | `string`                   | `undefined`     | Label text above input                           |
-| `placeholder`                 | `string`                   | `"Select date"` | Placeholder text                                 |
-| `isRequired`                  | `boolean`                  | `false`         | Shows asterisk if required                       |
-| `isError`                     | `boolean`                  | `false`         | Error state styling                              |
-| `errorMessage`                | `string`                   | `undefined`     | Error message to display                         |
-| `showInput`                   | `boolean`                  | `true`          | Show/hide the input field                        |
-| `showFarDates`                | `boolean`                  | `true`          | Show dates from previous/next months             |
-| `minDate`                     | `Date`                     | `undefined`     | Minimum selectable date                          |
-| `maxDate`                     | `Date`                     | `undefined`     | Maximum selectable date                          |
-| `isArrowShown`                | `boolean`                  | `true`          | Show/hide dropdown arrow                         |
-| `arrowColor`                  | `string`                   | `"rgba(...)"`   | Arrow icon color                                 |
-| `arrowSize`                   | `number`                   | `12`            | Arrow icon size                                  |
-| `customArrowRotation`         | `number`                   | `0`             | Arrow rotation angle when open                   |
-| `customArrowIcon`             | `React.ReactNode`          | `undefined`     | Custom arrow icon component                      |
-| `customHeader`                | `React.ReactNode`          | `undefined`     | Custom header component                          |
-| `customFooter`                | `React.ReactNode`          | `undefined`     | Custom footer component                          |
-| `onDatePickerOpened`          | `() => void`               | `undefined`     | Callback when picker opens                       |
-| `onDatePickerClosed`          | `() => void`               | `undefined`     | Callback when picker closes                      |
-| `cancelButtonText`            | `string`                   | `"Cancel"`      | Cancel button text                               |
-| `chooseDateButtonText`        | `string`                   | `"Choose date"` | Confirm button text                              |
-| `chooseYearButtonText`        | `string`                   | `"Choose year"` | Year selection button text                       |
-| `chooseMonthButtonText`       | `string`                   | `"Choose month"`| Month selection button text                      |
+| Prop                    | Type                     | Default          | Description                          |
+| ----------------------- | ------------------------ | ---------------- | ------------------------------------ |
+| `mode`                  | `"single" \| "range"`    | `"single"`       | Selection mode                       |
+| `value`                 | `Date \| DateRangeValue` | **required**     | Current selected date(s)             |
+| `onChange`              | `function`               | `undefined`      | Callback when date changes           |
+| `label`                 | `string`                 | `undefined`      | Label text above input               |
+| `placeholder`           | `string`                 | `"Select date"`  | Placeholder text                     |
+| `isRequired`            | `boolean`                | `false`          | Shows asterisk if required           |
+| `isError`               | `boolean`                | `false`          | Error state styling                  |
+| `errorMessage`          | `string`                 | `undefined`      | Error message to display             |
+| `showInput`             | `boolean`                | `true`           | Show/hide the input field            |
+| `showFarDates`          | `boolean`                | `true`           | Show dates from previous/next months |
+| `minDate`               | `Date`                   | `undefined`      | Minimum selectable date              |
+| `maxDate`               | `Date`                   | `undefined`      | Maximum selectable date              |
+| `isArrowShown`          | `boolean`                | `true`           | Show/hide dropdown arrow             |
+| `arrowColor`            | `string`                 | `"rgba(...)"`    | Arrow icon color                     |
+| `arrowSize`             | `number`                 | `12`             | Arrow icon size                      |
+| `customArrowRotation`   | `number`                 | `0`              | Arrow rotation angle when open       |
+| `customArrowIcon`       | `React.ReactNode`        | `undefined`      | Custom arrow icon component          |
+| `customHeader`          | `React.ReactNode`        | `undefined`      | Custom header component              |
+| `customFooter`          | `React.ReactNode`        | `undefined`      | Custom footer component              |
+| `onDatePickerOpened`    | `() => void`             | `undefined`      | Callback when picker opens           |
+| `onDatePickerClosed`    | `() => void`             | `undefined`      | Callback when picker closes          |
+| `cancelButtonText`      | `string`                 | `"Cancel"`       | Cancel button text                   |
+| `chooseDateButtonText`  | `string`                 | `"Choose date"`  | Confirm button text                  |
+| `chooseYearButtonText`  | `string`                 | `"Choose year"`  | Year selection button text           |
+| `chooseMonthButtonText` | `string`                 | `"Choose month"` | Month selection button text          |
 
 ### Color Customization Props
 
-| Prop                          | Type     | Default            | Description                              |
-| ----------------------------- | -------- | ------------------ | ---------------------------------------- |
-| `activeDateTextColor`         | `string` | `"#fff"`           | Text color for selected date             |
-| `activeDateBackgroundColor`   | `string` | `"#333"`           | Background color for selected date       |
-| `dateTextColor`               | `string` | `"#333"`           | Text color for regular dates             |
-| `dateBackgroundColor`         | `string` | `"transparent"`    | Background color for regular dates       |
-| `farDateTextColor`            | `string` | `"rgba(0,0,0,.25)"`| Text color for prev/next month dates     |
-| `farDateBackgroundColor`      | `string` | `"transparent"`    | Background for prev/next month dates     |
-| `rangeDateTextColor`          | `string` | `"#333"`           | Text color for dates in range            |
-| `rangeDateBackgroundColor`    | `string` | `"rgba(0,0,0,.075)"`| Background color for dates in range     |
-| `disabledDateTextColor`       | `string` | `"rgba(0,0,0,.25)"`| Text color for disabled dates            |
+| Prop                        | Type     | Default              | Description                          |
+| --------------------------- | -------- | -------------------- | ------------------------------------ |
+| `activeDateTextColor`       | `string` | `"#fff"`             | Text color for selected date         |
+| `activeDateBackgroundColor` | `string` | `"#333"`             | Background color for selected date   |
+| `dateTextColor`             | `string` | `"#333"`             | Text color for regular dates         |
+| `dateBackgroundColor`       | `string` | `"transparent"`      | Background color for regular dates   |
+| `farDateTextColor`          | `string` | `"rgba(0,0,0,.25)"`  | Text color for prev/next month dates |
+| `farDateBackgroundColor`    | `string` | `"transparent"`      | Background for prev/next month dates |
+| `rangeDateTextColor`        | `string` | `"#333"`             | Text color for dates in range        |
+| `rangeDateBackgroundColor`  | `string` | `"rgba(0,0,0,.075)"` | Background color for dates in range  |
+| `disabledDateTextColor`     | `string` | `"rgba(0,0,0,.25)"`  | Text color for disabled dates        |
 
 ### Style Props
 
-| Prop                     | Type                   | Default     | Description                         |
-| ------------------------ | ---------------------- | ----------- | ----------------------------------- |
-| `containerStyle`         | `StyleProp<ViewStyle>` | `undefined` | Container style                     |
-| `inputContainerStyle`    | `StyleProp<ViewStyle>` | `undefined` | Input container style               |
-| `labelStyle`             | `StyleProp<TextStyle>` | `undefined` | Label text style                    |
-| `placeholderStyle`       | `StyleProp<TextStyle>` | `undefined` | Placeholder text style              |
-| `errorMessageStyle`      | `StyleProp<TextStyle>` | `undefined` | Error message text style            |
-| `arrowContainerStyle`    | `StyleProp<ViewStyle>` | `undefined` | Arrow container style               |
-| `dateCellStyle`          | `StyleProp<ViewStyle>` | `undefined` | Date cell style                     |
-| `startDateCellStyle`     | `StyleProp<ViewStyle>` | `undefined` | Start date cell style (range mode)  |
-| `endDateCellStyle`       | `StyleProp<ViewStyle>` | `undefined` | End date cell style (range mode)    |
+| Prop                  | Type                   | Default     | Description                        |
+| --------------------- | ---------------------- | ----------- | ---------------------------------- |
+| `containerStyle`      | `StyleProp<ViewStyle>` | `undefined` | Container style                    |
+| `inputContainerStyle` | `StyleProp<ViewStyle>` | `undefined` | Input container style              |
+| `labelStyle`          | `StyleProp<TextStyle>` | `undefined` | Label text style                   |
+| `placeholderStyle`    | `StyleProp<TextStyle>` | `undefined` | Placeholder text style             |
+| `errorMessageStyle`   | `StyleProp<TextStyle>` | `undefined` | Error message text style           |
+| `arrowContainerStyle` | `StyleProp<ViewStyle>` | `undefined` | Arrow container style              |
+| `dateCellStyle`       | `StyleProp<ViewStyle>` | `undefined` | Date cell style                    |
+| `startDateCellStyle`  | `StyleProp<ViewStyle>` | `undefined` | Start date cell style (range mode) |
+| `endDateCellStyle`    | `StyleProp<ViewStyle>` | `undefined` | End date cell style (range mode)   |
 
 ### Button Props
 
-| Prop                     | Type                            | Default     | Description                    |
-| ------------------------ | ------------------------------- | ----------- | ------------------------------ |
-| `cancelButtonProps`      | `Omit<ButtonProps, "onPress">`  | `undefined` | Cancel button props            |
-| `chooseDateButtonProps`  | `Omit<ButtonProps, "onPress">`  | `undefined` | Choose date button props       |
-| `chooseYearButtonProps`  | `Omit<ButtonProps, "onPress">`  | `undefined` | Choose year button props       |
-| `chooseMonthButtonProps` | `Omit<ButtonProps, "onPress">`  | `undefined` | Choose month button props      |
+| Prop                     | Type                           | Default     | Description               |
+| ------------------------ | ------------------------------ | ----------- | ------------------------- |
+| `cancelButtonProps`      | `Omit<ButtonProps, "onPress">` | `undefined` | Cancel button props       |
+| `chooseDateButtonProps`  | `Omit<ButtonProps, "onPress">` | `undefined` | Choose date button props  |
+| `chooseYearButtonProps`  | `Omit<ButtonProps, "onPress">` | `undefined` | Choose year button props  |
+| `chooseMonthButtonProps` | `Omit<ButtonProps, "onPress">` | `undefined` | Choose month button props |
 
 ### Bottom Sheet Props
 
-| Prop                     | Type                                   | Default     | Description                    |
-| ------------------------ | -------------------------------------- | ----------- | ------------------------------ |
-| `bottomSheetModalProps`  | `Partial<BottomSheetModalProps>`       | `undefined` | Bottom sheet modal props       |
+| Prop                    | Type                             | Default     | Description              |
+| ----------------------- | -------------------------------- | ----------- | ------------------------ |
+| `bottomSheetModalProps` | `Partial<BottomSheetModalProps>` | `undefined` | Bottom sheet modal props |
 
 ## 📖 Ref Methods
 
 The component exposes the following methods via ref:
 
-| Method            | Description                          |
-| ----------------- | ------------------------------------ |
-| `open()`          | Opens the date picker modal          |
-| `close()`         | Closes the date picker modal         |
-| `handleChooseDate()` | Confirms the selected date        |
-| `swipeLeft()`     | Navigate to previous month           |
-| `swipeRight()`    | Navigate to next month               |
-| `changeYear()`    | Opens year selection modal           |
+| Method               | Description                  |
+| -------------------- | ---------------------------- |
+| `open()`             | Opens the date picker modal  |
+| `close()`            | Closes the date picker modal |
+| `handleChooseDate()` | Confirms the selected date   |
+| `swipeLeft()`        | Navigate to previous month   |
+| `swipeRight()`       | Navigate to next month       |
+| `changeYear()`       | Opens year selection modal   |
 
 ## 🎨 Advanced Examples
 

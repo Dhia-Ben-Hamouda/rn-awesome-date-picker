@@ -44,6 +44,8 @@ const react_native_reanimated_1 = __importStar(require("react-native-reanimated"
 const react_native_svg_1 = __importStar(require("react-native-svg"));
 const Button_1 = __importDefault(require("./Button"));
 const Modal_1 = __importDefault(require("./Modal"));
+const react_native_gesture_handler_1 = require("react-native-gesture-handler");
+const isIos = react_native_1.Platform.OS === "ios";
 const ANIMATION_DURATION = 500;
 const DEFAULT_ARROW_COLOR = "rgba(0,0,0,.75)";
 const DEFAULT_ARROW_SIZE = 12;
@@ -59,36 +61,39 @@ const DEFAULT_RANGE_DATE_BACKGROUND_COLOR = "rgba(0, 0, 0, 0.075)";
 const DEFAULT_DISABLED_DATE_TEXT_COLOR = "rgba(0,0,0,0.25)";
 const NUMBER_OF_DATE_CELLS_PER_SLIDE = 35;
 const YEAR_COLUMN_GAP = 4;
+const DEFAULT_CURRENT_SLIDE_FORMATTER = (date) => (0, moment_1.default)(date).format("MMMM Y");
 const AnimatedPressable = react_native_reanimated_1.default.createAnimatedComponent(react_native_1.Pressable);
-const isIos = react_native_1.Platform.OS === 'ios';
 function AngleDown({ size = 20, color = DEFAULT_ARROW_COLOR, }) {
     return (<react_native_svg_1.default width={size} height={size} viewBox="0 0 448 512">
       <react_native_svg_1.Path fill={color} d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"/>
     </react_native_svg_1.default>);
 }
-function generateCalendarData(date) {
+function generateCalendarData(date, customWeekDays) {
+    var _a;
     const m = (0, moment_1.default)(date);
-    const orderedWeekdays = [
-        moment_1.default.weekdaysShort()[1],
-        moment_1.default.weekdaysShort()[2],
-        moment_1.default.weekdaysShort()[3],
-        moment_1.default.weekdaysShort()[4],
-        moment_1.default.weekdaysShort()[5],
-        moment_1.default.weekdaysShort()[6],
-        moment_1.default.weekdaysShort()[0],
-    ].map(day => ({
+    const orderedWeekdays = (_a = (customWeekDays
+        ? customWeekDays
+        : [
+            moment_1.default.weekdaysShort()[1],
+            moment_1.default.weekdaysShort()[2],
+            moment_1.default.weekdaysShort()[3],
+            moment_1.default.weekdaysShort()[4],
+            moment_1.default.weekdaysShort()[5],
+            moment_1.default.weekdaysShort()[6],
+            moment_1.default.weekdaysShort()[0],
+        ])) === null || _a === void 0 ? void 0 : _a.map((day) => ({
         type: "weekday",
         label: day,
     }));
     const startOfMonth = m.clone().startOf("month");
     const numberOfdaysInCurrentMonth = m.daysInMonth();
-    const startWeekday = (startOfMonth.day() + 6) % 7;
+    const numberOfPreviousDays = (startOfMonth.day() + 6) % 7;
     const previousMonth = m.clone().subtract(1, "month");
     const numberOfDaysInPreviousMonth = previousMonth.daysInMonth();
-    const previousDays = Array.from({ length: startWeekday }).map((_, index) => {
+    const previousDays = Array.from({ length: numberOfPreviousDays }).map((_, index) => {
         const day = previousMonth
             .clone()
-            .date(numberOfDaysInPreviousMonth - startWeekday + index + 1)
+            .date(numberOfDaysInPreviousMonth - numberOfPreviousDays + index + 1)
             .toDate();
         return { type: "prev", label: day };
     });
@@ -113,7 +118,7 @@ function generateCalendarData(date) {
     });
     return [...orderedWeekdays, ...previousDays, ...currentDays, ...nextDays];
 }
-function MonthCell({ month, index, monthContainerWidth, selectedMonth, setSelectedMonth, activeMonthBackgroundColor, activeMonthTextColor, }) {
+function MonthCell({ month, index, monthContainerWidth, selectedMonth, setSelectedMonth, activeMonthBackgroundColor, activeMonthTextColor, monthCellStyle, }) {
     const isActiveCell = (0, react_native_reanimated_1.useSharedValue)(0);
     (0, react_1.useEffect)(() => {
         isActiveCell.value = (0, react_native_reanimated_1.withTiming)(month === selectedMonth ? 1 : 0);
@@ -141,13 +146,14 @@ function MonthCell({ month, index, monthContainerWidth, selectedMonth, setSelect
                 marginEnd: (index + 1) % 3 === 0 ? 0 : YEAR_COLUMN_GAP,
             },
             animatedContainerStyle,
+            monthCellStyle,
         ]}>
       <react_native_reanimated_1.default.Text style={[styles.yearText, animatedTextStyle]}>
         {(0, moment_1.default)().month(month).format("MMM")}
       </react_native_reanimated_1.default.Text>
     </AnimatedPressable>);
 }
-function YearCell({ year, index, yearContainerWidth, selectedYear, setSelectedYear, activeYearBackgroundColor, activeYearTextColor, }) {
+function YearCell({ year, index, yearContainerWidth, selectedYear, setSelectedYear, activeYearBackgroundColor, activeYearTextColor, yearCellStyle, }) {
     const isActiveCell = (0, react_native_reanimated_1.useSharedValue)(0);
     (0, react_1.useEffect)(() => {
         isActiveCell.value = (0, react_native_reanimated_1.withTiming)(year === (selectedYear === null || selectedYear === void 0 ? void 0 : selectedYear.toString()) ? 1 : 0);
@@ -175,6 +181,7 @@ function YearCell({ year, index, yearContainerWidth, selectedYear, setSelectedYe
                 marginEnd: (index + 1) % 3 === 0 ? 0 : YEAR_COLUMN_GAP,
             },
             animatedContainerStyle,
+            yearCellStyle,
         ]}>
       <react_native_reanimated_1.default.Text style={[styles.yearText, animatedTextStyle]}>
         {year}
@@ -289,8 +296,7 @@ function DateCell({ isLastInRow, label, cellType, mode, localDate, setLocalDate,
       </react_native_reanimated_1.default.Text>
     </AnimatedPressable>);
 }
-function DatePicker({ containerStyle, inputContainerStyle, labelStyle, isRequired = false, isError, errorMessage, errorMessageStyle, label, placeholder = "Select date", onChange, value, mode = "single", isArrowShown = true, arrowColor = DEFAULT_ARROW_COLOR, arrowSize = DEFAULT_ARROW_SIZE, placeholderStyle, arrowContainerStyle, customArrowIcon, onDatePickerOpened, onDatePickerClosed, customArrowRotation = DEFAULT_ARROW_ROTATION, bottomSheetModalProps, cancelButtonProps, chooseDateButtonProps, chooseYearButtonProps, chooseMonthButtonProps, chooseYearButtonText = "Choose year", chooseMonthButtonText = "Choose month", cancelButtonText = "Cancel", chooseDateButtonText = "Choose date", activeDateTextColor = DEFAULT_ACTIVE_DATE_TEXT_COLOR, activeDateBackgroundColor = DEFAULT_ACTIVE_DATE_BACKGROUND_COLOR, dateTextColor = DEFAULT_DATE_TEXT_COLOR, dateBackgroundColor = DEFAULT_DATE_BACKGROUND_COLOR, farDateTextColor = DEFAULT_FAR_DATE_TEXT_COLOR, farDateBackgroundColor = DEFAULT_FAR_DATE_BACKGROUND_COLOR, rangeDateTextColor = DEFAULT_RANGE_DATE_TEXT_COLOR, rangeDateBackgroundColor = DEFAULT_RANGE_DATE_BACKGROUND_COLOR, disabledDateTextColor = DEFAULT_DISABLED_DATE_TEXT_COLOR, customHeader, customFooter, showInput = true, showFarDates = true, dateCellStyle, startDateCellStyle, endDateCellStyle, minDate, maxDate, }, ref) {
-    var _a;
+function DatePicker({ containerStyle, inputContainerStyle, labelStyle, isRequired = false, isError, errorMessage, errorMessageStyle, label, placeholder = "Select date", onChange, value, mode = "single", isArrowShown = true, arrowColor = DEFAULT_ARROW_COLOR, arrowSize = DEFAULT_ARROW_SIZE, placeholderStyle, arrowContainerStyle, customArrowIcon, onDatePickerOpened, onDatePickerClosed, customArrowRotation = DEFAULT_ARROW_ROTATION, bottomSheetModalProps, cancelButtonProps, chooseDateButtonProps, chooseYearButtonProps, chooseMonthButtonProps, chooseYearButtonText = "Choose year", chooseMonthButtonText = "Choose month", cancelButtonText = "Cancel", chooseDateButtonText = "Choose date", activeDateTextColor = DEFAULT_ACTIVE_DATE_TEXT_COLOR, activeDateBackgroundColor = DEFAULT_ACTIVE_DATE_BACKGROUND_COLOR, dateTextColor = DEFAULT_DATE_TEXT_COLOR, dateBackgroundColor = DEFAULT_DATE_BACKGROUND_COLOR, farDateTextColor = DEFAULT_FAR_DATE_TEXT_COLOR, farDateBackgroundColor = DEFAULT_FAR_DATE_BACKGROUND_COLOR, rangeDateTextColor = DEFAULT_RANGE_DATE_TEXT_COLOR, rangeDateBackgroundColor = DEFAULT_RANGE_DATE_BACKGROUND_COLOR, disabledDateTextColor = DEFAULT_DISABLED_DATE_TEXT_COLOR, customHeader, customFooter, showInput = true, showFarDates = true, dateCellStyle, startDateCellStyle, endDateCellStyle, customWeekDays, currentSlideFormatter = DEFAULT_CURRENT_SLIDE_FORMATTER, yearCellStyle, monthCellStyle, minDate, maxDate, }, ref) {
     const isOpen = (0, react_native_reanimated_1.useSharedValue)(0);
     const bottomSheetModalRef = (0, react_1.useRef)(null);
     const [localDate, setLocalDate] = (0, react_1.useState)(value);
@@ -321,7 +327,7 @@ function DatePicker({ containerStyle, inputContainerStyle, labelStyle, isRequire
     }));
     const handleMonthChange = (direction) => {
         const isPrev = direction === "prev";
-        setCurrentSlide(prev => (0, moment_1.default)(prev)
+        setCurrentSlide((prev) => (0, moment_1.default)(prev)
             .add(isPrev ? -1 : 1, "month")
             .toDate());
     };
@@ -385,7 +391,7 @@ function DatePicker({ containerStyle, inputContainerStyle, labelStyle, isRequire
         return years;
     }
     const handleDecadeChange = (direction) => {
-        setCurrentDecade(prev => (0, moment_1.default)(prev)
+        setCurrentDecade((prev) => (0, moment_1.default)(prev)
             .add(direction === "prev" ? -10 : 10, "years")
             .toDate());
     };
@@ -419,7 +425,7 @@ function DatePicker({ containerStyle, inputContainerStyle, labelStyle, isRequire
         (_a = bottomSheetModalRef.current) === null || _a === void 0 ? void 0 : _a.close();
     };
     const calendatData = (0, react_1.useMemo)(() => {
-        return generateCalendarData(currentSlide);
+        return generateCalendarData(currentSlide, customWeekDays);
     }, [currentSlide]);
     (0, react_1.useImperativeHandle)(ref, () => ({
         open: () => {
@@ -471,7 +477,7 @@ function DatePicker({ containerStyle, inputContainerStyle, labelStyle, isRequire
               {errorMessage}
             </react_native_1.Text>)}
         </>)}
-      <bottom_sheet_1.BottomSheetModal ref={bottomSheetModalRef} backdropComponent={bottomSheetModalBackdrop} handleComponent={() => <></>} enableDynamicSizing={false} enablePanDownToClose onDismiss={resetToInitialState} snapPoints={[isIos ? "55%" : "60%"]} {...bottomSheetModalProps}>
+      <bottom_sheet_1.BottomSheetModal ref={bottomSheetModalRef} backdropComponent={bottomSheetModalBackdrop} handleComponent={() => <></>} enableDynamicSizing={false} enablePanDownToClose onDismiss={resetToInitialState} snapPoints={[isIos ? "55%" : "60.5%"]} {...bottomSheetModalProps}>
         <react_native_1.View style={[styles.sheetContainer]}>
           {customHeader !== null && customHeader !== void 0 ? customHeader : (<react_native_1.View style={[styles.header]}>
               <react_native_1.TouchableOpacity onPress={() => handleMonthChange("prev")} hitSlop={25}>
@@ -483,7 +489,7 @@ function DatePicker({ containerStyle, inputContainerStyle, labelStyle, isRequire
                 setIsYearsModalOpen(true);
             }}>
                 <react_native_1.Text style={[styles.headerDate]}>
-                  {(_a = (0, moment_1.default)(currentSlide)) === null || _a === void 0 ? void 0 : _a.format("MMMM Y")}
+                  {currentSlideFormatter(currentSlide)}
                 </react_native_1.Text>
               </react_native_1.TouchableOpacity>
               <react_native_1.TouchableOpacity onPress={() => handleMonthChange("next")} hitSlop={25}>
@@ -492,7 +498,7 @@ function DatePicker({ containerStyle, inputContainerStyle, labelStyle, isRequire
                 </react_native_reanimated_1.default.View>
               </react_native_1.TouchableOpacity>
             </react_native_1.View>)}
-          <react_native_1.FlatList numColumns={7} bounces={false} contentContainerStyle={styles.dateContainer} data={calendatData} renderItem={({ item, index }) => {
+          <react_native_gesture_handler_1.FlatList numColumns={7} bounces={false} contentContainerStyle={styles.dateContainer} showsVerticalScrollIndicator={false} data={calendatData} renderItem={({ item, index }) => {
             const isLastInRow = (index + 1) % 7 === 0;
             if (item.type === "weekday") {
                 return (<react_native_1.View style={[styles.cell, !isLastInRow && { marginRight: 4 }]}>
@@ -539,13 +545,14 @@ function DatePicker({ containerStyle, inputContainerStyle, labelStyle, isRequire
               </react_native_reanimated_1.default.View>
             </react_native_1.TouchableOpacity>
           </react_native_1.View>
-          <react_native_1.FlatList numColumns={3} contentContainerStyle={[
+          <react_native_gesture_handler_1.FlatList numColumns={3} contentContainerStyle={[
             {
                 gap: YEAR_COLUMN_GAP,
+                minHeight: 180,
             },
-        ]} onLayout={event => {
+        ]} onLayout={(event) => {
             setYearContainerWidth(event.nativeEvent.layout.width);
-        }} data={generateYearsArray(currentDecade)} renderItem={({ item, index }) => (<YearCell activeYearTextColor={activeDateTextColor} activeYearBackgroundColor={activeDateBackgroundColor} setSelectedYear={setSelectedYear} selectedYear={selectedYear} yearContainerWidth={yearContainerWidth} index={index} year={item === null || item === void 0 ? void 0 : item.toString()}/>)}/>
+        }} data={generateYearsArray(currentDecade)} renderItem={({ item, index }) => (<YearCell key={index} activeYearTextColor={activeDateTextColor} activeYearBackgroundColor={activeDateBackgroundColor} setSelectedYear={setSelectedYear} selectedYear={selectedYear} yearContainerWidth={yearContainerWidth} yearCellStyle={yearCellStyle} year={item === null || item === void 0 ? void 0 : item.toString()} index={index}/>)}/>
           <react_native_1.View style={{
             flexDirection: "row",
             gap: 8,
@@ -565,13 +572,13 @@ function DatePicker({ containerStyle, inputContainerStyle, labelStyle, isRequire
           </react_native_1.View>
         </Modal_1.default>
         <Modal_1.default containerStyle={styles.yearModal} isOpen={isMonthsModalOpen} setIsOpen={setIsMonthsModalOpen}>
-          <react_native_1.FlatList numColumns={3} contentContainerStyle={[
+          <react_native_gesture_handler_1.FlatList numColumns={3} contentContainerStyle={[
             {
                 gap: YEAR_COLUMN_GAP,
             },
-        ]} onLayout={event => {
+        ]} onLayout={(event) => {
             setYearContainerWidth(event.nativeEvent.layout.width);
-        }} data={Array.from({ length: 12 }).map((item, index) => index)} renderItem={({ item, index }) => (<MonthCell activeMonthTextColor={activeDateTextColor} activeMonthBackgroundColor={activeDateBackgroundColor} month={item} selectedMonth={selectedMonth} setSelectedMonth={setSelectedMonth} monthContainerWidth={yearContainerWidth} index={index}/>)}/>
+        }} data={Array.from({ length: 12 }).map((item, index) => index)} renderItem={({ item, index }) => (<MonthCell key={index} activeMonthTextColor={activeDateTextColor} activeMonthBackgroundColor={activeDateBackgroundColor} month={item} selectedMonth={selectedMonth} setSelectedMonth={setSelectedMonth} monthContainerWidth={yearContainerWidth} monthCellStyle={monthCellStyle} index={index}/>)}/>
           <react_native_1.View style={{
             flexDirection: "row",
             gap: 8,

@@ -16,7 +16,6 @@ import React, {
   useState,
 } from "react";
 import {
-  FlatList,
   Platform,
   Pressable,
   StyleProp,
@@ -39,7 +38,9 @@ import Animated, {
 import Svg, { Path } from "react-native-svg";
 import Button, { IButton as ButtonProps } from "./Button";
 import Modal from "./Modal";
+import { FlatList } from "react-native-gesture-handler";
 
+const isIos = Platform.OS === "ios";
 const ANIMATION_DURATION = 500;
 
 const DEFAULT_ARROW_COLOR = "rgba(0,0,0,.75)";
@@ -62,9 +63,10 @@ const DEFAULT_DISABLED_DATE_TEXT_COLOR = "rgba(0,0,0,0.25)";
 
 const NUMBER_OF_DATE_CELLS_PER_SLIDE = 35;
 const YEAR_COLUMN_GAP = 4;
+const DEFAULT_CURRENT_SLIDE_FORMATTER = (date: Date) =>
+  moment(date).format("MMMM Y");
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-const isIos = Platform.OS === 'ios';
 
 type DateMode = "single" | "range";
 type DateValue = Date | null;
@@ -87,36 +89,45 @@ function AngleDown({
   );
 }
 
-function generateCalendarData(date: Date): ICalendarItem[] {
+function generateCalendarData(
+  date: Date,
+  customWeekDays?: string[]
+): ICalendarItem[] {
   const m = moment(date);
 
-  const orderedWeekdays = [
-    moment.weekdaysShort()[1],
-    moment.weekdaysShort()[2],
-    moment.weekdaysShort()[3],
-    moment.weekdaysShort()[4],
-    moment.weekdaysShort()[5],
-    moment.weekdaysShort()[6],
-    moment.weekdaysShort()[0],
-  ].map(day => ({
+  const orderedWeekdays = (
+    customWeekDays
+      ? customWeekDays
+      : [
+          moment.weekdaysShort()[1],
+          moment.weekdaysShort()[2],
+          moment.weekdaysShort()[3],
+          moment.weekdaysShort()[4],
+          moment.weekdaysShort()[5],
+          moment.weekdaysShort()[6],
+          moment.weekdaysShort()[0],
+        ]
+  )?.map((day) => ({
     type: "weekday" as const,
     label: day,
   }));
 
   const startOfMonth = m.clone().startOf("month");
   const numberOfdaysInCurrentMonth = m.daysInMonth();
-  const startWeekday = (startOfMonth.day() + 6) % 7;
+  const numberOfPreviousDays = (startOfMonth.day() + 6) % 7;
 
   const previousMonth = m.clone().subtract(1, "month");
   const numberOfDaysInPreviousMonth = previousMonth.daysInMonth();
 
-  const previousDays = Array.from({ length: startWeekday }).map((_, index) => {
-    const day = previousMonth
-      .clone()
-      .date(numberOfDaysInPreviousMonth - startWeekday + index + 1)
-      .toDate();
-    return { type: "prev" as const, label: day };
-  });
+  const previousDays = Array.from({ length: numberOfPreviousDays }).map(
+    (_, index) => {
+      const day = previousMonth
+        .clone()
+        .date(numberOfDaysInPreviousMonth - numberOfPreviousDays + index + 1)
+        .toDate();
+      return { type: "prev" as const, label: day };
+    }
+  );
 
   const currentDays = Array.from({ length: numberOfdaysInCurrentMonth }).map(
     (_, index) => {
@@ -125,7 +136,7 @@ function generateCalendarData(date: Date): ICalendarItem[] {
         .date(index + 1)
         .toDate();
       return { type: "current" as const, label: day };
-    },
+    }
   );
 
   const totalDaysSoFar = previousDays?.length + currentDays?.length;
@@ -143,7 +154,7 @@ function generateCalendarData(date: Date): ICalendarItem[] {
         .date(index + 1)
         .toDate();
       return { type: "next" as const, label: day };
-    },
+    }
   );
 
   return [...orderedWeekdays, ...previousDays, ...currentDays, ...nextDays];
@@ -157,6 +168,7 @@ interface IMonthCell {
   setSelectedMonth: React.Dispatch<SetStateAction<number>>;
   activeMonthBackgroundColor: string;
   activeMonthTextColor: string;
+  monthCellStyle?: StyleProp<Omit<ViewStyle, "backgroundColor" | "color">>;
 }
 
 function MonthCell({
@@ -167,6 +179,7 @@ function MonthCell({
   setSelectedMonth,
   activeMonthBackgroundColor,
   activeMonthTextColor,
+  monthCellStyle,
 }: IMonthCell) {
   const isActiveCell = useSharedValue(0);
 
@@ -178,7 +191,7 @@ function MonthCell({
     const backgroundColor = interpolateColor(
       isActiveCell.value,
       [0, 1],
-      ["transparent", activeMonthBackgroundColor],
+      ["transparent", activeMonthBackgroundColor]
     );
 
     return {
@@ -190,7 +203,7 @@ function MonthCell({
     const color = interpolateColor(
       isActiveCell.value,
       [0, 1],
-      ["#333", activeMonthTextColor],
+      ["#333", activeMonthTextColor]
     );
 
     return {
@@ -212,7 +225,9 @@ function MonthCell({
           marginEnd: (index + 1) % 3 === 0 ? 0 : YEAR_COLUMN_GAP,
         },
         animatedContainerStyle,
-      ]}>
+        monthCellStyle,
+      ]}
+    >
       <Animated.Text style={[styles.yearText, animatedTextStyle]}>
         {moment().month(month).format("MMM")}
       </Animated.Text>
@@ -226,6 +241,7 @@ interface IYearCell {
   yearContainerWidth: number;
   selectedYear: number;
   setSelectedYear: React.Dispatch<SetStateAction<number>>;
+  yearCellStyle?: StyleProp<Omit<ViewStyle, "backgroundColor" | "color">>;
   activeYearBackgroundColor: string;
   activeYearTextColor: string;
 }
@@ -238,6 +254,7 @@ function YearCell({
   setSelectedYear,
   activeYearBackgroundColor,
   activeYearTextColor,
+  yearCellStyle,
 }: IYearCell) {
   const isActiveCell = useSharedValue(0);
 
@@ -249,7 +266,7 @@ function YearCell({
     const backgroundColor = interpolateColor(
       isActiveCell.value,
       [0, 1],
-      ["transparent", activeYearBackgroundColor],
+      ["transparent", activeYearBackgroundColor]
     );
 
     return {
@@ -261,7 +278,7 @@ function YearCell({
     const color = interpolateColor(
       isActiveCell.value,
       [0, 1],
-      ["#333", activeYearTextColor],
+      ["#333", activeYearTextColor]
     );
 
     return {
@@ -283,7 +300,9 @@ function YearCell({
           marginEnd: (index + 1) % 3 === 0 ? 0 : YEAR_COLUMN_GAP,
         },
         animatedContainerStyle,
-      ]}>
+        yearCellStyle,
+      ]}
+    >
       <Animated.Text style={[styles.yearText, animatedTextStyle]}>
         {year}
       </Animated.Text>
@@ -384,7 +403,7 @@ function DateCell({
         baseBackgroundColor = interpolateColor(
           isInRange.value,
           [0, 1],
-          [dateBackgroundColor, rangeDateBackgroundColor],
+          [dateBackgroundColor, rangeDateBackgroundColor]
         );
       }
 
@@ -392,7 +411,7 @@ function DateCell({
         baseBackgroundColor = interpolateColor(
           isActive.value,
           [0, 1],
-          [baseBackgroundColor, activeDateBackgroundColor],
+          [baseBackgroundColor, activeDateBackgroundColor]
         );
       }
     }
@@ -412,7 +431,7 @@ function DateCell({
         baseColor = interpolateColor(
           isInRange.value,
           [0, 1],
-          [dateTextColor, rangeDateTextColor],
+          [dateTextColor, rangeDateTextColor]
         );
       }
 
@@ -420,7 +439,7 @@ function DateCell({
         baseColor = interpolateColor(
           isActive.value,
           [0, 1],
-          [baseColor, activeDateTextColor],
+          [baseColor, activeDateTextColor]
         );
       }
     }
@@ -483,7 +502,8 @@ function DateCell({
         isStartDateCell && startDateCellStyle,
         isEndDateCell && endDateCellStyle,
         animatedContainerStyle,
-      ]}>
+      ]}
+    >
       <Animated.Text style={[animatedTextStyle]}>
         {moment(label).format("D")}
       </Animated.Text>
@@ -554,6 +574,10 @@ interface IDatePickerBase {
   dateCellStyle?: StyleProp<Omit<ViewStyle, "backgroundColor" | "color">>;
   startDateCellStyle?: StyleProp<Omit<ViewStyle, "backgroundColor" | "color">>;
   endDateCellStyle?: StyleProp<Omit<ViewStyle, "backgroundColor" | "color">>;
+  currentSlideFormatter?: (date: Date) => string;
+  customWeekDays?: string[];
+  yearCellStyle?: StyleProp<Omit<ViewStyle, "backgroundColor" | "color">>;
+  monthCellStyle?: StyleProp<Omit<ViewStyle, "backgroundColor" | "color">>;
   minDate?: Date;
   maxDate?: Date;
 }
@@ -620,10 +644,14 @@ function DatePicker(
     dateCellStyle,
     startDateCellStyle,
     endDateCellStyle,
+    customWeekDays,
+    currentSlideFormatter = DEFAULT_CURRENT_SLIDE_FORMATTER,
+    yearCellStyle,
+    monthCellStyle,
     minDate,
     maxDate,
   }: IDatePicker,
-  ref: React.Ref<IDatePickerRef>,
+  ref: React.Ref<IDatePickerRef>
 ) {
   const isOpen = useSharedValue(0);
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -661,10 +689,10 @@ function DatePicker(
 
   const handleMonthChange = (direction: "prev" | "next") => {
     const isPrev = direction === "prev";
-    setCurrentSlide(prev =>
+    setCurrentSlide((prev) =>
       moment(prev)
         .add(isPrev ? -1 : 1, "month")
-        .toDate(),
+        .toDate()
     );
   };
 
@@ -688,7 +716,7 @@ function DatePicker(
         appearsOnIndex={0}
       />
     ),
-    [],
+    []
   );
 
   const animatedArrowStyle = useAnimatedStyle(() => {
@@ -696,7 +724,7 @@ function DatePicker(
       isOpen.value,
       [0, 1],
       [0, customArrowRotation],
-      Extrapolation.CLAMP,
+      Extrapolation.CLAMP
     );
 
     return {
@@ -746,10 +774,10 @@ function DatePicker(
   }
 
   const handleDecadeChange = (direction: "prev" | "next") => {
-    setCurrentDecade(prev =>
+    setCurrentDecade((prev) =>
       moment(prev)
         .add(direction === "prev" ? -10 : 10, "years")
-        .toDate(),
+        .toDate()
     );
   };
 
@@ -760,7 +788,7 @@ function DatePicker(
     const [start, end] = value as DateRangeValue;
     if (start && end) {
       return `${moment(start).format("DD/MM/YYYY")} - ${moment(end).format(
-        "DD/MM/YYYY",
+        "DD/MM/YYYY"
       )}`;
     }
     if (start) {
@@ -784,7 +812,7 @@ function DatePicker(
   };
 
   const calendatData = useMemo(() => {
-    return generateCalendarData(currentSlide);
+    return generateCalendarData(currentSlide, customWeekDays);
   }, [currentSlide]);
 
   useImperativeHandle(ref, () => ({
@@ -826,9 +854,11 @@ function DatePicker(
               styles.inputContainer,
               inputContainerStyle,
               isError && { borderColor: "red" },
-            ]}>
+            ]}
+          >
             <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+              style={{ flexDirection: "row", alignItems: "center", gap: 12 }}
+            >
               <Text style={[styles.label, placeholderStyle]}>
                 {formatDisplayValue()}
               </Text>
@@ -859,16 +889,19 @@ function DatePicker(
         enableDynamicSizing={false}
         enablePanDownToClose
         onDismiss={resetToInitialState}
-        snapPoints={[isIos ? "55%" : "60%"]}
-        {...bottomSheetModalProps}>
+        snapPoints={[isIos ? "55%" : "60.5%"]}
+        {...bottomSheetModalProps}
+      >
         <View style={[styles.sheetContainer]}>
           {customHeader ?? (
             <View style={[styles.header]}>
               <TouchableOpacity
                 onPress={() => handleMonthChange("prev")}
-                hitSlop={25}>
+                hitSlop={25}
+              >
                 <Animated.View
-                  style={[styles.leftArrow, animatedLeftArrowStyle]}>
+                  style={[styles.leftArrow, animatedLeftArrowStyle]}
+                >
                   <AngleDown size={18} color="#333" />
                 </Animated.View>
               </TouchableOpacity>
@@ -876,16 +909,19 @@ function DatePicker(
                 hitSlop={25}
                 onPress={() => {
                   setIsYearsModalOpen(true);
-                }}>
+                }}
+              >
                 <Text style={[styles.headerDate]}>
-                  {moment(currentSlide)?.format("MMMM Y")}
+                  {currentSlideFormatter(currentSlide)}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => handleMonthChange("next")}
-                hitSlop={25}>
+                hitSlop={25}
+              >
                 <Animated.View
-                  style={[styles.rightArrow, animatedRightArrowStyle]}>
+                  style={[styles.rightArrow, animatedRightArrowStyle]}
+                >
                   <AngleDown size={18} color="#333" />
                 </Animated.View>
               </TouchableOpacity>
@@ -895,6 +931,7 @@ function DatePicker(
             numColumns={7}
             bounces={false}
             contentContainerStyle={styles.dateContainer}
+            showsVerticalScrollIndicator={false}
             data={calendatData}
             renderItem={({ item, index }) => {
               const isLastInRow = (index + 1) % 7 === 0;
@@ -902,7 +939,8 @@ function DatePicker(
               if (item.type === "weekday") {
                 return (
                   <View
-                    style={[styles.cell, !isLastInRow && { marginRight: 4 }]}>
+                    style={[styles.cell, !isLastInRow && { marginRight: 4 }]}
+                  >
                     <Text style={styles.weekDay}>{item.label}</Text>
                   </View>
                 );
@@ -950,7 +988,8 @@ function DatePicker(
                 containerStyle={[
                   styles.button,
                   cancelButtonProps?.containerStyle,
-                ]}>
+                ]}
+              >
                 {cancelButtonText}
               </Button>
               <Button
@@ -963,7 +1002,8 @@ function DatePicker(
                 containerStyle={[
                   styles.button,
                   chooseDateButtonProps?.containerStyle,
-                ]}>
+                ]}
+              >
                 {chooseDateButtonText}
               </Button>
             </View>
@@ -972,11 +1012,13 @@ function DatePicker(
         <Modal
           containerStyle={styles.yearModal}
           isOpen={isYearsModalOpen}
-          setIsOpen={setIsYearsModalOpen}>
+          setIsOpen={setIsYearsModalOpen}
+        >
           <View style={[styles.header, { paddingHorizontal: 0 }]}>
             <TouchableOpacity
               onPress={() => handleDecadeChange("prev")}
-              hitSlop={25}>
+              hitSlop={25}
+            >
               <Animated.View style={[styles.leftArrow, animatedLeftArrowStyle]}>
                 <AngleDown size={18} color="#333" />
               </Animated.View>
@@ -988,9 +1030,11 @@ function DatePicker(
             </Text>
             <TouchableOpacity
               onPress={() => handleDecadeChange("next")}
-              hitSlop={25}>
+              hitSlop={25}
+            >
               <Animated.View
-                style={[styles.rightArrow, animatedRightArrowStyle]}>
+                style={[styles.rightArrow, animatedRightArrowStyle]}
+              >
                 <AngleDown size={18} color="#333" />
               </Animated.View>
             </TouchableOpacity>
@@ -1000,21 +1044,24 @@ function DatePicker(
             contentContainerStyle={[
               {
                 gap: YEAR_COLUMN_GAP,
+                minHeight: 180,
               },
             ]}
-            onLayout={event => {
+            onLayout={(event) => {
               setYearContainerWidth(event.nativeEvent.layout.width);
             }}
             data={generateYearsArray(currentDecade)}
             renderItem={({ item, index }) => (
               <YearCell
+                key={index}
                 activeYearTextColor={activeDateTextColor}
                 activeYearBackgroundColor={activeDateBackgroundColor}
                 setSelectedYear={setSelectedYear}
                 selectedYear={selectedYear}
                 yearContainerWidth={yearContainerWidth}
-                index={index}
+                yearCellStyle={yearCellStyle}
                 year={item?.toString()}
+                index={index}
               />
             )}
           />
@@ -1022,7 +1069,8 @@ function DatePicker(
             style={{
               flexDirection: "row",
               gap: 8,
-            }}>
+            }}
+          >
             <Button
               onPress={() => {
                 setIsYearsModalOpen(false);
@@ -1035,7 +1083,8 @@ function DatePicker(
                   flex: 1,
                 },
                 chooseYearButtonProps?.containerStyle,
-              ]}>
+              ]}
+            >
               {chooseYearButtonText}
             </Button>
           </View>
@@ -1043,7 +1092,8 @@ function DatePicker(
         <Modal
           containerStyle={styles.yearModal}
           isOpen={isMonthsModalOpen}
-          setIsOpen={setIsMonthsModalOpen}>
+          setIsOpen={setIsMonthsModalOpen}
+        >
           <FlatList
             numColumns={3}
             contentContainerStyle={[
@@ -1051,18 +1101,20 @@ function DatePicker(
                 gap: YEAR_COLUMN_GAP,
               },
             ]}
-            onLayout={event => {
+            onLayout={(event) => {
               setYearContainerWidth(event.nativeEvent.layout.width);
             }}
             data={Array.from({ length: 12 }).map((item, index) => index)}
             renderItem={({ item, index }) => (
               <MonthCell
+                key={index}
                 activeMonthTextColor={activeDateTextColor}
                 activeMonthBackgroundColor={activeDateBackgroundColor}
                 month={item}
                 selectedMonth={selectedMonth}
                 setSelectedMonth={setSelectedMonth}
                 monthContainerWidth={yearContainerWidth}
+                monthCellStyle={monthCellStyle}
                 index={index}
               />
             )}
@@ -1071,11 +1123,12 @@ function DatePicker(
             style={{
               flexDirection: "row",
               gap: 8,
-            }}>
+            }}
+          >
             <Button
               onPress={() => {
                 setCurrentSlide(
-                  moment().year(selectedYear).month(selectedMonth).toDate(),
+                  moment().year(selectedYear).month(selectedMonth).toDate()
                 );
                 setIsMonthsModalOpen(false);
               }}
@@ -1086,7 +1139,8 @@ function DatePicker(
                   flex: 1,
                 },
                 chooseMonthButtonProps?.containerStyle,
-              ]}>
+              ]}
+            >
               {chooseMonthButtonText}
             </Button>
           </View>
@@ -1097,11 +1151,11 @@ function DatePicker(
 }
 
 export default forwardRef(DatePicker) as <
-  T extends DateMode = "single" | "range",
+  T extends DateMode = "single" | "range"
 >(
   props: (T extends "range" ? IDatePickerRange : IDatePickerSingle) & {
     ref?: React.Ref<IDatePickerRef>;
-  },
+  }
 ) => ReturnType<typeof DatePicker>;
 
 const styles = StyleSheet.create({
