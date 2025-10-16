@@ -578,6 +578,7 @@ interface IDatePickerBase {
   customWeekDays?: string[];
   yearCellStyle?: StyleProp<Omit<ViewStyle, "backgroundColor" | "color">>;
   monthCellStyle?: StyleProp<Omit<ViewStyle, "backgroundColor" | "color">>;
+  onSlideChange?: (newSlide: Date) => void;
   minDate?: Date;
   maxDate?: Date;
 }
@@ -648,6 +649,7 @@ function DatePicker(
     currentSlideFormatter = DEFAULT_CURRENT_SLIDE_FORMATTER,
     yearCellStyle,
     monthCellStyle,
+    onSlideChange,
     minDate,
     maxDate,
   }: IDatePicker,
@@ -674,6 +676,7 @@ function DatePicker(
 
   useEffect(() => {
     setCurrentDecade(currentSlide);
+    onSlideChange && onSlideChange(currentSlide);
   }, [currentSlide]);
 
   const leftArrowScale = useSharedValue(1);
@@ -811,7 +814,7 @@ function DatePicker(
     bottomSheetModalRef.current?.close();
   };
 
-  const calendatData = useMemo(() => {
+  const calendarData = useMemo(() => {
     return generateCalendarData(currentSlide, customWeekDays);
   }, [currentSlide]);
 
@@ -932,7 +935,7 @@ function DatePicker(
             bounces={false}
             contentContainerStyle={styles.dateContainer}
             showsVerticalScrollIndicator={false}
-            data={calendatData}
+            data={calendarData}
             renderItem={({ item, index }) => {
               const isLastInRow = (index + 1) % 7 === 0;
 

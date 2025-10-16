@@ -1,6 +1,6 @@
 # rn-awesome-date-picker
 
-A highly customizable and animated date picker component for React Native, built with React Native Reanimated and featuring both single date and date range selection modes.
+A highly customizable and animated date picker component for React Native, built with **React Native Reanimated** and featuring both single date and date range selection modes.
 
 ![Preview text](https://github.com/Dhia-Ben-Hamouda/rn-awesome-date-picker/blob/main/src/assets/preview.gif)
 
@@ -24,7 +24,7 @@ npm install rn-awesome-date-picker
 yarn add rn-awesome-date-picker
 ```
 
-Then install the required peer dependencies:
+Then install and setup the required peer dependencies:
 
 ```bash
 npm install react-native-reanimated react-native-worklets react-native-gesture-handler react-native-linear-gradient react-native-svg @gorhom/bottom-sheet
@@ -121,33 +121,34 @@ function App() {
 
 ### Base Props (Common to both modes)
 
-| Prop                    | Type                     | Default          | Description                          |
-| ----------------------- | ------------------------ | ---------------- | ------------------------------------ |
-| `mode`                  | `"single" \| "range"`    | `"single"`       | Selection mode                       |
-| `value`                 | `Date \| DateRangeValue` | **required**     | Current selected date(s)             |
-| `onChange`              | `function`               | `undefined`      | Callback when date changes           |
-| `label`                 | `string`                 | `undefined`      | Label text above input               |
-| `placeholder`           | `string`                 | `"Select date"`  | Placeholder text                     |
-| `isRequired`            | `boolean`                | `false`          | Shows asterisk if required           |
-| `isError`               | `boolean`                | `false`          | Error state styling                  |
-| `errorMessage`          | `string`                 | `undefined`      | Error message to display             |
-| `showInput`             | `boolean`                | `true`           | Show/hide the input field            |
-| `showFarDates`          | `boolean`                | `true`           | Show dates from previous/next months |
-| `minDate`               | `Date`                   | `undefined`      | Minimum selectable date              |
-| `maxDate`               | `Date`                   | `undefined`      | Maximum selectable date              |
-| `isArrowShown`          | `boolean`                | `true`           | Show/hide dropdown arrow             |
-| `arrowColor`            | `string`                 | `"rgba(...)"`    | Arrow icon color                     |
-| `arrowSize`             | `number`                 | `12`             | Arrow icon size                      |
-| `customArrowRotation`   | `number`                 | `0`              | Arrow rotation angle when open       |
-| `customArrowIcon`       | `React.ReactNode`        | `undefined`      | Custom arrow icon component          |
-| `customHeader`          | `React.ReactNode`        | `undefined`      | Custom header component              |
-| `customFooter`          | `React.ReactNode`        | `undefined`      | Custom footer component              |
-| `onDatePickerOpened`    | `() => void`             | `undefined`      | Callback when picker opens           |
-| `onDatePickerClosed`    | `() => void`             | `undefined`      | Callback when picker closes          |
-| `cancelButtonText`      | `string`                 | `"Cancel"`       | Cancel button text                   |
-| `chooseDateButtonText`  | `string`                 | `"Choose date"`  | Confirm button text                  |
-| `chooseYearButtonText`  | `string`                 | `"Choose year"`  | Year selection button text           |
-| `chooseMonthButtonText` | `string`                 | `"Choose month"` | Month selection button text          |
+| Prop                    | Type                       | Default          | Description                          |
+| ----------------------- | -------------------------- | ---------------- | ------------------------------------ |
+| `mode`                  | `"single" \| "range"`      | `"single"`       | Selection mode                       |
+| `value`                 | `Date \| DateRangeValue`   | **required**     | Current selected date(s)             |
+| `onChange`              | `function`                 | `undefined`      | Callback when date changes           |
+| `label`                 | `string`                   | `undefined`      | Label text above input               |
+| `placeholder`           | `string`                   | `"Select date"`  | Placeholder text                     |
+| `isRequired`            | `boolean`                  | `false`          | Shows asterisk if required           |
+| `isError`               | `boolean`                  | `false`          | Error state styling                  |
+| `errorMessage`          | `string`                   | `undefined`      | Error message to display             |
+| `showInput`             | `boolean`                  | `true`           | Show/hide the input field            |
+| `showFarDates`          | `boolean`                  | `true`           | Show dates from previous/next months |
+| `minDate`               | `Date`                     | `undefined`      | Minimum selectable date              |
+| `maxDate`               | `Date`                     | `undefined`      | Maximum selectable date              |
+| `isArrowShown`          | `boolean`                  | `true`           | Show/hide dropdown arrow             |
+| `arrowColor`            | `string`                   | `"rgba(...)"`    | Arrow icon color                     |
+| `arrowSize`             | `number`                   | `12`             | Arrow icon size                      |
+| `customArrowRotation`   | `number`                   | `0`              | Arrow rotation angle when open       |
+| `customArrowIcon`       | `React.ReactNode`          | `undefined`      | Custom arrow icon component          |
+| `customHeader`          | `React.ReactNode`          | `undefined`      | Custom header component              |
+| `customFooter`          | `React.ReactNode`          | `undefined`      | Custom footer component              |
+| `onDatePickerOpened`    | `() => void`               | `undefined`      | Callback when picker opens           |
+| `onDatePickerClosed`    | `() => void`               | `undefined`      | Callback when picker closes          |
+| `cancelButtonText`      | `string`                   | `"Cancel"`       | Cancel button text                   |
+| `chooseDateButtonText`  | `string`                   | `"Choose date"`  | Confirm button text                  |
+| `chooseYearButtonText`  | `string`                   | `"Choose year"`  | Year selection button text           |
+| `chooseMonthButtonText` | `string`                   | `"Choose month"` | Month selection button text          |
+| `onSlideChange`         | `(newSlide: Date) => void` | `undefined`      | Callback when slide changes          |
 
 ### Color Customization Props
 

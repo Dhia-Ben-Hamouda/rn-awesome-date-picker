@@ -296,7 +296,7 @@ function DateCell({ isLastInRow, label, cellType, mode, localDate, setLocalDate,
       </react_native_reanimated_1.default.Text>
     </AnimatedPressable>);
 }
-function DatePicker({ containerStyle, inputContainerStyle, labelStyle, isRequired = false, isError, errorMessage, errorMessageStyle, label, placeholder = "Select date", onChange, value, mode = "single", isArrowShown = true, arrowColor = DEFAULT_ARROW_COLOR, arrowSize = DEFAULT_ARROW_SIZE, placeholderStyle, arrowContainerStyle, customArrowIcon, onDatePickerOpened, onDatePickerClosed, customArrowRotation = DEFAULT_ARROW_ROTATION, bottomSheetModalProps, cancelButtonProps, chooseDateButtonProps, chooseYearButtonProps, chooseMonthButtonProps, chooseYearButtonText = "Choose year", chooseMonthButtonText = "Choose month", cancelButtonText = "Cancel", chooseDateButtonText = "Choose date", activeDateTextColor = DEFAULT_ACTIVE_DATE_TEXT_COLOR, activeDateBackgroundColor = DEFAULT_ACTIVE_DATE_BACKGROUND_COLOR, dateTextColor = DEFAULT_DATE_TEXT_COLOR, dateBackgroundColor = DEFAULT_DATE_BACKGROUND_COLOR, farDateTextColor = DEFAULT_FAR_DATE_TEXT_COLOR, farDateBackgroundColor = DEFAULT_FAR_DATE_BACKGROUND_COLOR, rangeDateTextColor = DEFAULT_RANGE_DATE_TEXT_COLOR, rangeDateBackgroundColor = DEFAULT_RANGE_DATE_BACKGROUND_COLOR, disabledDateTextColor = DEFAULT_DISABLED_DATE_TEXT_COLOR, customHeader, customFooter, showInput = true, showFarDates = true, dateCellStyle, startDateCellStyle, endDateCellStyle, customWeekDays, currentSlideFormatter = DEFAULT_CURRENT_SLIDE_FORMATTER, yearCellStyle, monthCellStyle, minDate, maxDate, }, ref) {
+function DatePicker({ containerStyle, inputContainerStyle, labelStyle, isRequired = false, isError, errorMessage, errorMessageStyle, label, placeholder = "Select date", onChange, value, mode = "single", isArrowShown = true, arrowColor = DEFAULT_ARROW_COLOR, arrowSize = DEFAULT_ARROW_SIZE, placeholderStyle, arrowContainerStyle, customArrowIcon, onDatePickerOpened, onDatePickerClosed, customArrowRotation = DEFAULT_ARROW_ROTATION, bottomSheetModalProps, cancelButtonProps, chooseDateButtonProps, chooseYearButtonProps, chooseMonthButtonProps, chooseYearButtonText = "Choose year", chooseMonthButtonText = "Choose month", cancelButtonText = "Cancel", chooseDateButtonText = "Choose date", activeDateTextColor = DEFAULT_ACTIVE_DATE_TEXT_COLOR, activeDateBackgroundColor = DEFAULT_ACTIVE_DATE_BACKGROUND_COLOR, dateTextColor = DEFAULT_DATE_TEXT_COLOR, dateBackgroundColor = DEFAULT_DATE_BACKGROUND_COLOR, farDateTextColor = DEFAULT_FAR_DATE_TEXT_COLOR, farDateBackgroundColor = DEFAULT_FAR_DATE_BACKGROUND_COLOR, rangeDateTextColor = DEFAULT_RANGE_DATE_TEXT_COLOR, rangeDateBackgroundColor = DEFAULT_RANGE_DATE_BACKGROUND_COLOR, disabledDateTextColor = DEFAULT_DISABLED_DATE_TEXT_COLOR, customHeader, customFooter, showInput = true, showFarDates = true, dateCellStyle, startDateCellStyle, endDateCellStyle, customWeekDays, currentSlideFormatter = DEFAULT_CURRENT_SLIDE_FORMATTER, yearCellStyle, monthCellStyle, onSlideChange, minDate, maxDate, }, ref) {
     const isOpen = (0, react_native_reanimated_1.useSharedValue)(0);
     const bottomSheetModalRef = (0, react_1.useRef)(null);
     const [localDate, setLocalDate] = (0, react_1.useState)(value);
@@ -316,6 +316,7 @@ function DatePicker({ containerStyle, inputContainerStyle, labelStyle, isRequire
     const [selectedMonth, setSelectedMonth] = (0, react_1.useState)(currentSlide === null || currentSlide === void 0 ? void 0 : currentSlide.getMonth());
     (0, react_1.useEffect)(() => {
         setCurrentDecade(currentSlide);
+        onSlideChange && onSlideChange(currentSlide);
     }, [currentSlide]);
     const leftArrowScale = (0, react_native_reanimated_1.useSharedValue)(1);
     const rightArrowScale = (0, react_native_reanimated_1.useSharedValue)(1);
@@ -424,7 +425,7 @@ function DatePicker({ containerStyle, inputContainerStyle, labelStyle, isRequire
         }
         (_a = bottomSheetModalRef.current) === null || _a === void 0 ? void 0 : _a.close();
     };
-    const calendatData = (0, react_1.useMemo)(() => {
+    const calendarData = (0, react_1.useMemo)(() => {
         return generateCalendarData(currentSlide, customWeekDays);
     }, [currentSlide]);
     (0, react_1.useImperativeHandle)(ref, () => ({
@@ -498,7 +499,7 @@ function DatePicker({ containerStyle, inputContainerStyle, labelStyle, isRequire
                 </react_native_reanimated_1.default.View>
               </react_native_1.TouchableOpacity>
             </react_native_1.View>)}
-          <react_native_gesture_handler_1.FlatList numColumns={7} bounces={false} contentContainerStyle={styles.dateContainer} showsVerticalScrollIndicator={false} data={calendatData} renderItem={({ item, index }) => {
+          <react_native_gesture_handler_1.FlatList numColumns={7} bounces={false} contentContainerStyle={styles.dateContainer} showsVerticalScrollIndicator={false} data={calendarData} renderItem={({ item, index }) => {
             const isLastInRow = (index + 1) % 7 === 0;
             if (item.type === "weekday") {
                 return (<react_native_1.View style={[styles.cell, !isLastInRow && { marginRight: 4 }]}>
